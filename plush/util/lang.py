@@ -25,7 +25,7 @@ class cachedproperty(property):
 
     def __get__(self, instance, owner):
         if not hasattr(self, 'memoized'):
-            self.memoized = self.fget(instance or owner)
+            self.memoized = self.fget(instance)
 
         return self.memoized
 

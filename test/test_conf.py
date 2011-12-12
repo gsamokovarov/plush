@@ -24,13 +24,6 @@ class SettingDescriptorBase(unittest.TestCase):
         })
 
 class SettingDescriptorTest(SettingDescriptorBase):
-    def test_that_it_bounds_properly_to_classes(self):
-        Holder = self.Holder
-
-        self.assertEqual(Holder.int, 2)
-        self.assertEqual(Holder.bool, True)
-        self.assertEqual(Holder.falsy, '')
-
     def test_that_it_bounds_properly_to_instances(self):
         Holder = self.Holder()
 
@@ -39,11 +32,11 @@ class SettingDescriptorTest(SettingDescriptorBase):
         self.assertEqual(Holder.falsy, '')
 
     def test_that_it_converts_values_properly(self):
-        Holder = self.TypedHolder
+        holder = self.TypedHolder()
 
-        self.assertEqual(Holder.int, 2)
-        self.assertEqual(Holder.bool, True)
-        self.assertEqual(Holder.falsy, False)
+        self.assertEqual(holder.int, 2)
+        self.assertEqual(holder.bool, True)
+        self.assertEqual(holder.falsy, False)
 
 
 class SettingsTest(unittest.TestCase):

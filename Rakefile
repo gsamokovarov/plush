@@ -1,11 +1,11 @@
 %w{ rubygems rake }.each { |pack| require pack }
 
 module Dependencies
-  %w{python pip virtualenv nosetests pylint git}.each { |dep|
+  %w{python pip virtualenv nosetests pylint git}.each do |dep|
     define_method(dep) do |input = nil|
       sh "#{dep} #{Array === input ? input.join(' ') : input}"
     end
-  }
+  end
   self
 end
 

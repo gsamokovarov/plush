@@ -33,14 +33,14 @@ class SettingDescriptor(object):
     DEFAULT_SETTINGS_ATTR = 'settings'
     DEFAULT_TYPE = staticmethod(identity)
 
-    def __init__(self, name, type=None, default=None, settings_attr=None):
+    def __init__(self, name, default=None, type=None, settings_attr=None):
         self.name = name
         self.default = default
         self.type = type or self.DEFAULT_TYPE
         self.settings_attr = settings_attr or self.DEFAULT_SETTINGS_ATTR
 
     def __get__(self, instance, owner):
-        settings = getattr(instance or owner, self.settings_attr)
+        settings = getattr(instance, self.settings_attr)
 
         return self.type(settings.get(self.name, self.default))
 
@@ -143,7 +143,6 @@ class SettingsView(dict):
 
     def __init__(self, settings):
         dict.__init__(self)
-        self.update(type(self).__dict__)
 
         self.settings = settings
 
@@ -159,4 +158,7 @@ class SettingsView(dict):
         try:
             return getattr(self, setting)
         except AttributeError:
-            raise KeyError(setting)
+            return self.settings[setting]
+
+    def update(self, *args, **kw):
+        self.settings.update(*args, **kw)
