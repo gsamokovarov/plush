@@ -1,0 +1,4 @@
+.*.sw?
+*.py[co]
+env/
+docs/
