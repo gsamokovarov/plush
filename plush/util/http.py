@@ -17,7 +17,7 @@ def parse_content_type(raw_content_type):
 
     return (type, params)
 
-def encode_content_type(type, params):
+def encode_content_type(type, params=None):
     '''
     Encodes `type` string and dictionary of parameters to HTTP _Content-Type_
     header friendly message.
@@ -25,7 +25,7 @@ def encode_content_type(type, params):
     Does not escape the special characters at the moment, so keep that in mind.
     '''
 
-    params = ['%s=%s' % (name, value) for name, value in params]
+    params = ['%s=%s' % (name, val) for name, val in (params or {}).items()]
     params = ';'.join(params)
 
-    return ';'.join([type, params])
+    return ';'.join(filter(bool, [type, params]))

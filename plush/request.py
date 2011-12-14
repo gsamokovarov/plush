@@ -8,6 +8,7 @@ from tornado.escape import to_unicode, json_encode as to_json
 
 from .util.lang import identity, cachedproperty, tap
 from .util.http import parse_content_type, encode_content_type
+from .util.iter import apply_defaults_from
 
 __all__ = "Request HTTPError".split()
 
@@ -153,7 +154,7 @@ class Request(RequestHandler, redirect_from('request', 'application')):
 
         self.set_status(getattr(error, 'status_code', status_code))
 
-        return tap(str(error or ''), lambda obj: self.try_finish(obj))
+        return tap(str(error or ''), lambda obj: self.finish(obj))
 
     def json(self, obj=None, **json):
         '''
@@ -191,12 +192,6 @@ class Request(RequestHandler, redirect_from('request', 'application')):
             return self.error(obj)
 
         return tap(to_unicode(obj), lambda obj: self.write(obj))
-
-    def try_finish(self, chunk):
-        if self._auto_finish:
-            return self.write(chunk)
-
-        self.finish(chunk)
 
 
 class RequestComposition(object):
@@ -242,6 +237,8 @@ class Mimetype(RequestComposition):
     mime types setting and getting.
     '''
 
+    DEFAULT_MIME_PARAMS = {'charset': 'utf-8'}
+
     def __init__(self, request):
         RequestComposition.__init__(self, request)
 
@@ -256,6 +253,7 @@ class Mimetype(RequestComposition):
     def set(self, type, **params):
         'Sets a `type` for the current request.'
 
+        apply_defaults_from(self.DEFAULT_MIME_PARAMS, to=params)
         self.request.set_headers('Content-Type',
                                  encode_content_type(type, params))
 

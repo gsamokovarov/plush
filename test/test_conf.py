@@ -23,6 +23,7 @@ class SettingDescriptorBase(unittest.TestCase):
             'falsy': SettingDescriptor('falsy', type=bool),
         })
 
+
 class SettingDescriptorTest(SettingDescriptorBase):
     def test_that_it_bounds_properly_to_instances(self):
         Holder = self.Holder()
@@ -40,4 +41,19 @@ class SettingDescriptorTest(SettingDescriptorBase):
 
 
 class SettingsTest(unittest.TestCase):
-    pass
+    def setUp(self):
+        self.Plain = type('Plain', (object,), {})
+
+    def test_that_it_has_attribute_access(self):
+        settings = Settings({'foo': 'bar'})
+
+        self.assertEqual(settings.foo, settings['foo'])
+
+    def test_that_it_loads_from_objects(self):
+        obj = self.Plain()
+        obj.bacon = 'Fresh'
+
+        settings = Settings.from_object(obj)
+
+        self.assertTrue('bacon' in settings)
+        self.assertEqual(settings.bacon, 'Fresh')
