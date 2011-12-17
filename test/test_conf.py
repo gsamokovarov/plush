@@ -1,6 +1,6 @@
 import unittest
 
-from plush.conf import Settings, Setting
+from plush.conf import Settings, Setting, SettingsView
 
 
 class SettingBase(unittest.TestCase):
@@ -24,7 +24,7 @@ class SettingBase(unittest.TestCase):
         })
 
 
-class SettingTest(SettingBase):
+class TestSetting(SettingBase):
     def test_that_it_bounds_properly_to_instances(self):
         Holder = self.Holder()
 
@@ -40,7 +40,7 @@ class SettingTest(SettingBase):
         self.assertEqual(holder.falsy, False)
 
 
-class SettingsTest(unittest.TestCase):
+class TestSettings(unittest.TestCase):
     def setUp(self):
         self.Plain = type('Plain', (object,), {})
 
@@ -57,3 +57,39 @@ class SettingsTest(unittest.TestCase):
 
         self.assertTrue('bacon' in settings)
         self.assertEqual(settings.bacon, 'Fresh')
+
+
+class TestSettingsView(unittest.TestCase):
+    def setUp(self):
+        class Configuration(SettingsView):
+            static_path = Setting('STATIC_PATH', '/static/')
+            static_handler_class = Setting('STATIC_HANDLER_CLASS')
+            log_function = Setting('LOG_FUNCTION')
+
+        self.Configuration = Configuration
+
+    def test_that_it_respects_defaults(self):
+        conf = self.Configuration({})
+
+        self.assertTrue(conf['static_path'] == '/static/')
+
+    def test_that_it_respects_configuration(self):
+        conf = self.Configuration(dict(STATIC_PATH='/'))
+
+        self.assertTrue(conf['static_path'] == '/')
+
+    def test_that_it_can_get_with_defaults(self):
+        conf = self.Configuration({})
+
+        self.assertTrue(conf.get('static_handler_class', 'Charlie'), 'Charlie')
+
+    def test_that_it_preserves_contains_behaviour(self):
+        conf = self.Configuration({})
+
+        self.assertFalse('log_function' in conf)
+
+    def test_that_we_forward_getitem_only_for_defined_settings(self):
+        conf = self.Configuration({})
+
+        for key in ('static_handler_class', 'log_function'):
+            self.assertFalse(key in conf)

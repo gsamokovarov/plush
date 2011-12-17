@@ -62,4 +62,9 @@ def try_in_order(*functions, **kw):
 identity = lambda obj: obj
 
 #: Unique singleton.
-Sentinel = object()
+class SentinelType(object):
+    def __nonzero__(self):
+        return False
+    __bool__ = __nonzero__
+
+Sentinel = SentinelType()

@@ -35,7 +35,7 @@ class Setting(object):
 
     def __init__(self, name, default=None, type=None, settings_attr=None):
         self.name = name
-        self.default = default
+        self.default = default or Sentinel
         self.type = type or self.DEFAULT_TYPE
         self.settings_attr = settings_attr or self.DEFAULT_SETTINGS_ATTR
 
@@ -130,9 +130,7 @@ class SettingsView(dict):
     settings container.
 
     The setting descriptors can be accessed using the `__getitem__` notation
-    because we forward the descriptors. Further more we redirect item inclusion
-    to the underlying settings so we get correct behaviour for the current
-    `tornado` application use cases.
+    because we forward the descriptors.
     '''
 
     def __init__(self, settings):
@@ -140,19 +138,11 @@ class SettingsView(dict):
 
         self.settings = settings
 
-    def get(self, key, default=None):
-        value = getattr(self, key, Sentinel)
+        class_attrs, dict_attrs = dir(type(self)), dir(dict)
 
-        return self.settings.get(key, default) if value is Sentinel else value
+        possibilities = set(class_attrs).difference(dict_attrs)
 
-    def __contains__(self, key):
-        return key in self.settings or getattr(self, key, None)
-
-    def __getitem__(self, key):
-        try:
-            return getattr(self, key)
-        except AttributeError:
-            return self.settings[key]
-
-    def update(self, *args, **kw):
-        self.settings.update(*args, **kw)
+        for name in possibilities:
+            setting = getattr(self, name)
+            if setting is not Sentinel:
+                self[name] = setting

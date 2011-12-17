@@ -3,7 +3,7 @@ import unittest
 
 
 from plush.util.lang import classonlymethod, cachedproperty, \
-                            identity, try_in_order
+                            identity, try_in_order, Sentinel
 
 
 class ClassOnlyMethodTest(unittest.TestCase):
@@ -25,9 +25,7 @@ class ClassOnlyMethodTest(unittest.TestCase):
 
     def test_that_it_has_classmethod_behavior(self):
         class SpecificTester(self.Tester):
-            '''
-            Just a sublcass to prove it.
-            '''
+            'Just a sublcass to prove it.'
 
         self.assertEqual(SpecificTester.special_method(), SpecificTester)
 
@@ -75,3 +73,7 @@ class TryInOrderTest(unittest.TestCase):
         with self.assertRaises(IndexError):
             try_in_order(lambda: 1/0, lambda: [][0])
 
+
+class SentinelTest(unittest.TestCase):
+    def test_that_it_is_falsy(self):
+        self.assertFalse(bool(Sentinel))

@@ -20,11 +20,11 @@ class Configuration(SettingsView):
     gzip = Setting('GZIP')
 
     static_path = Setting('STATIC_PATH', 'static')
-    static_url_prefix = Setting('STATIC_URL_PREFIX', '/static/')
+    static_url_prefix = Setting('STATIC_URL_PREFIX')
     static_handler_class = Setting('STATIC_HANDLER_CLASS')
     static_handler_args = Setting('STATIC_HANDLER_ARGS')
 
-    ui_modules = Setting('UI_MODULES', 'modules')
+    ui_modules = Setting('UI_MODULES')
     ui_methods = Setting('UI_METHODS')
 
     log_function = Setting('LOG_FUNCTION')
@@ -39,10 +39,12 @@ class Backend(Application):
     def __init__(self, handlers=None, default_host='', transforms=None,
                  wsgi=False, settings=None, plush=None, **rest):
 
-        Application.__init__(self, rest.pop('routes', None) or handlers,
-                                   default_host, transforms, wsgi, **rest)
+        settings = Configuration(settings or {})
+        settings.update(rest)
 
         self.plush = plush
 
-        self.settings = Configuration(self.settings)
-        self.settings.update(settings or {})
+        Application.__init__(self, rest.pop('routes', None) or handlers,
+                                   default_host, transforms, wsgi, **settings)
+
+

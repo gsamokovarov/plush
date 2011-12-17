@@ -58,7 +58,7 @@ class RegistrableTest(unittest.TestCase):
     def test_on_registration_data_binding(self):
         Ent = type('Ent', (Registrable,), {
             'on_registration': classmethod(lambda cls: {
-                    'non_entry_specific': True
+                'non_entry_specific': True
             })
         })
         Ent.make_registry()
