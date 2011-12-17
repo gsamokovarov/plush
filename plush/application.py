@@ -7,13 +7,11 @@ from .request import Request
 from .backend import Backend
 from .server import Server
 from .conf import Settings
-from .util.lang import cachedproperty, tap
+from .util.lang import tap
 
 
 class Plush(object):
     'The :class:`Plush` abstracts a whole web application.'
-
-    DEFAULT_SETTINGS_ENV = 'PLUSH_SETTINGS_MODULE'
 
     #: The default request class.
     request_class = Request
@@ -30,51 +28,18 @@ class Plush(object):
     #: The default io loop class.
     io_loop_class = IOLoop
 
-    def __init__(self, module_name, settings_env=None, settings_file=None, 
-                       io_loop=None, complain_about_settings=False,
-                       **user_settings):
-
+    def __init__(self, module_name, io_loop=None, **user_settings):
         self.module_name = module_name
 
         self.io_loop = io_loop or self.io_loop_class.instance()
 
-        self.user_settings = Settings(user_settings)
-        self.settings_env = settings_env or self.DEFAULT_SETTINGS_ENV
-        self.settings_file = settings_file
-
-        self.complain_about_settings = complain_about_settings
+        self.settings = Settings(user_settings)
 
         self.transforms = []
         self.decorators = []
         self.mixins = []
 
         self.routes = []
-
-    @cachedproperty
-    def settings(self):
-        '''
-        Returns the appication settings.
-
-        There are two types of settings - _global_ and _user_ settings. The
-        user settings are the one set in the :class:`Plush` constructor, the
-        one loaded from a file, are global. The user settings are applied on
-        top of the global ones, so they can override them.
-        '''
-
-        try:
-            if self.settings_file:
-                settings = Settings.from_pyfile(self.settings_file)
-            else:
-                settings = Settings.from_env(self.settings_env)
-        except:
-            if self.complain_about_settings:
-                raise
-
-            settings = Settings()
-        else:
-            settings.update(self.user_settings)
-
-        return settings
 
     #: Features and customizations.
 

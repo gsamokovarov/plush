@@ -2,7 +2,6 @@ import httplib
 
 from tornado.web import HTTPError
 
-
 __all__ = 'Error response_for'.split()
 
 
@@ -17,7 +16,7 @@ class Error(HTTPError):
     status_code = 500
 
     def __init__(self, log_message, *args):
-        self.log_message = log_message
+        self.log_message = str(log_message)
         self.args = args
 
 

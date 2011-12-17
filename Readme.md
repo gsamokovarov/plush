@@ -3,7 +3,6 @@
         |    __/       |   |   |__     |       |
         |___|  |_______|_______|_______|___|___|
         
-
 # Introduction
 
 _Plush_ is a micro web framework for Python, inspired by the current generation

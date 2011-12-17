@@ -2,35 +2,35 @@ from __future__ import absolute_import
 
 from tornado.web import Application
 
-from .conf import SettingDescriptor, SettingsView
+from .conf import Setting, SettingsView
 
 
 class Configuration(SettingsView):
     'Upper cased settings view for the standard `tornado` settings.'
 
-    debug = SettingDescriptor('DEBUG')
+    debug = Setting('DEBUG')
 
-    template_path = SettingDescriptor('TEMPLATE_PATH', 'templates')
-    template_loader = SettingDescriptor('TEMPLATE_LOADER')
+    template_path = Setting('TEMPLATE_PATH', 'templates')
+    template_loader = Setting('TEMPLATE_LOADER')
 
-    autoescape = SettingDescriptor('AUTOESCAPE')
+    autoescape = Setting('AUTOESCAPE')
 
-    login_url = SettingDescriptor('LOGIN_URL')
+    login_url = Setting('LOGIN_URL')
 
-    gzip = SettingDescriptor('GZIP')
+    gzip = Setting('GZIP')
 
-    static_path = SettingDescriptor('STATIC_PATH', 'static')
-    static_url_prefix = SettingDescriptor('STATIC_URL_PREFIX', '/static/')
-    static_handler_class = SettingDescriptor('STATIC_HANDLER_CLASS')
-    static_handler_args = SettingDescriptor('STATIC_HANDLER_ARGS')
+    static_path = Setting('STATIC_PATH', 'static')
+    static_url_prefix = Setting('STATIC_URL_PREFIX', '/static/')
+    static_handler_class = Setting('STATIC_HANDLER_CLASS')
+    static_handler_args = Setting('STATIC_HANDLER_ARGS')
 
-    ui_modules = SettingDescriptor('UI_MODULES', 'modules')
-    ui_methods = SettingDescriptor('UI_METHODS')
+    ui_modules = Setting('UI_MODULES', 'modules')
+    ui_methods = Setting('UI_METHODS')
 
-    log_function = SettingDescriptor('LOG_FUNCTION')
+    log_function = Setting('LOG_FUNCTION')
 
-    cookie_secret = SettingDescriptor('COOKIE_SECRET')
-    xsrf_cookies = SettingDescriptor('XSRF_COOKIES')
+    cookie_secret = Setting('COOKIE_SECRET')
+    xsrf_cookies = Setting('XSRF_COOKIES')
 
 
 class Backend(Application):
@@ -39,7 +39,7 @@ class Backend(Application):
     def __init__(self, handlers=None, default_host='', transforms=None,
                  wsgi=False, settings=None, plush=None, **rest):
 
-        Application.__init__(self, handlers or rest.pop('routes', None),
+        Application.__init__(self, rest.pop('routes', None) or None,
                                    default_host, transforms, wsgi, **rest)
 
         self.plush = plush

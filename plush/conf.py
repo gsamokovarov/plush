@@ -7,9 +7,9 @@ try:
 except ImportError:
     from .util.compat.importlib import import_module
 
-from .util.lang import try_in_order, identity, Sentinel
+from .util.lang import try_in_order, tap, identity, Sentinel
 
-__all__ = "SettingDescriptor Settings SettingsView".split()
+__all__ = "Setting Settings SettingsView".split()
 
 try:
     import yaml
@@ -19,7 +19,7 @@ else:
     YAML_ENABLED = True
 
 
-class SettingDescriptor(object):
+class Setting(object):
     '''
     Descriptor allowing to redirect instance attributes to the settings object.
 
@@ -58,25 +58,22 @@ class Settings(dict):
     '''
 
     if YAML_ENABLED:
-        def from_yaml(cls, markup, filename=True):
+        def from_yaml(self, markup, filename=True):
             '''
             Creates a :class:`Settings` object from YAML `markup` or YAML file
             name if `filename` is truthful.
             '''
 
-            if filename:
-                with open(markup) as yaml_file:
-                    return cls(yaml.load(yaml_file))
+            if not filename:
+                return tap(self, lambda self: self.update(yaml.load(markup)))
 
-            return cls(yaml.load(markup))
+            with open(markup) as file:
+                return tap(self, lambda self: self.update(yaml.load(file)))
     else:
-        def from_yaml(cls, markup, filename=True):
+        def from_yaml(self, markup, filename=True):
             raise NotImplementedError("You need pyyaml for this.")
 
-    from_yaml = classmethod(from_yaml)
-
-    @classmethod
-    def from_env(cls, envar):
+    def from_env(self, envar):
         '''
         Creates a :class:`Settings` object from the environment variable
         `envar` pointing to a Python file, Python module or YAML file.
@@ -85,33 +82,30 @@ class Settings(dict):
         if envar not in os.environ:
             raise ValueError("Expected %s in environment" % envar)
 
-        return try_in_order(cls.from_pyfile, cls.from_yaml, cls.from_module,
+        return try_in_order(self.from_pyfile, self.from_yaml, self.from_module,
                             args=(os.environ[envar],))
 
-    @classmethod
-    def from_pyfile(cls, filename):
+    def from_pyfile(self, filename):
         'Creates a :class:`Settings` object from a python file.'
 
         namespace = {}
         execfile(filename, namespace)
 
-        return cls(namespace)
+        return tap(self, lambda self: self.update(namespace))
 
-    @classmethod
-    def from_object(cls, obj):
+    def from_object(self, obj):
         'Creates a :class:`Settings` object from a regular python object.'
 
-        return cls(obj.__dict__)
+        return tap(self, lambda self: self.update(obj.__dict__))
 
-    @classmethod
-    def from_module(cls, modulename):
+    def from_module(self, modulename):
         '''
         Creates a :class:`Settings` object from a module.
 
         The module must be importable from the current execution point.
         '''
 
-        return cls.from_object(import_module(modulename))
+        return self.from_object(import_module(modulename))
 
     def has(self, *options):
         'Checks whether the settings include all of the specified options.'
@@ -146,19 +140,19 @@ class SettingsView(dict):
 
         self.settings = settings
 
-    def get(self, setting, default=None):
-        value = getattr(self, setting, Sentinel)
+    def get(self, key, default=None):
+        value = getattr(self, key, Sentinel)
 
-        return default if value is Sentinel else value
+        return self.settings.get(key, default) if value is Sentinel else value
 
-    def __contains__(self, setting):
-        return setting in self.settings
+    def __contains__(self, key):
+        return key in self.settings or getattr(self, key, None)
 
-    def __getitem__(self, setting):
+    def __getitem__(self, key):
         try:
-            return getattr(self, setting)
+            return getattr(self, key)
         except AttributeError:
-            return self.settings[setting]
+            return self.settings[key]
 
     def update(self, *args, **kw):
         self.settings.update(*args, **kw)

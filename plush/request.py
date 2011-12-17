@@ -3,14 +3,15 @@ from __future__ import absolute_import
 import re
 import json
 
-from tornado.web import RequestHandler, HTTPError
-from tornado.escape import to_unicode, json_encode as to_json
+from tornado.web import RequestHandler
+from tornado.escape import json_encode as to_json
 
+from .response import BadRequest
 from .util.lang import identity, cachedproperty, tap
 from .util.http import parse_content_type, encode_content_type
 from .util.iter import apply_defaults_from
 
-__all__ = "Request HTTPError".split()
+__all__ = "Request".split()
 
 
 def redirect_from(*targets):
@@ -130,7 +131,7 @@ class Request(RequestHandler, redirect_from('request', 'application')):
         try:
             return type(RequestHandler.get_argument(self, name, default, strip))
         except ValueError, message:
-            raise HTTPError(400, str(message))
+            raise BadRequest(message)
 
     def error(self, error=None, status_code=500):
         '''
@@ -145,7 +146,7 @@ class Request(RequestHandler, redirect_from('request', 'application')):
 
         Optionally the `error` object can be missed altogether and you can send
         just and status code. This is useful if you want to set a JSON error
-        with :meth:`jsonify` and set a custom status code.
+        with :meth:`json` and set a custom status code.
 
         This method finishes the request.
 
@@ -167,10 +168,7 @@ class Request(RequestHandler, redirect_from('request', 'application')):
         Returns the created JSON.
         '''
 
-        if obj is not None:
-            return tap(to_json(obj), lambda json: self.write(json))
-        
-        return tap(to_json(json), lambda json: self.write(json))
+        return tap(to_json(obj or json), lambda json: self.write(json))
 
     def send(self, obj):
         '''
@@ -191,7 +189,7 @@ class Request(RequestHandler, redirect_from('request', 'application')):
         elif isinstance(obj, Exception):
             return self.error(obj)
 
-        return tap(to_unicode(obj), lambda obj: self.write(obj))
+        return tap(str(obj), lambda obj: self.write(obj))
 
 
 class RequestComposition(object):
@@ -237,7 +235,7 @@ class Mimetype(RequestComposition):
     mime types setting and getting.
     '''
 
-    DEFAULT_MIME_PARAMS = {'charset': 'utf-8'}
+    DEFAULT_MIME_PARAMS = dict(charset='utf-8')
 
     def __init__(self, request):
         RequestComposition.__init__(self, request)

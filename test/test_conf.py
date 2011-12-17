@@ -1,9 +1,9 @@
 import unittest
 
-from plush.conf import Settings, SettingDescriptor
+from plush.conf import Settings, Setting
 
 
-class SettingDescriptorBase(unittest.TestCase):
+class SettingBase(unittest.TestCase):
     def setUp(self):
         self.Holder = type('Holder', (object,), {
             'settings': Settings({
@@ -12,19 +12,19 @@ class SettingDescriptorBase(unittest.TestCase):
                 'falsy': ''
             }),
 
-            'int': SettingDescriptor('int'),
-            'bool': SettingDescriptor('bool'),
-            'falsy': SettingDescriptor('falsy'),
+            'int': Setting('int'),
+            'bool': Setting('bool'),
+            'falsy': Setting('falsy'),
         })
 
         self.TypedHolder = type('TypedHolder', (self.Holder,), {
-            'int': SettingDescriptor('int', type=int),
-            'bool': SettingDescriptor('bool', type=bool),
-            'falsy': SettingDescriptor('falsy', type=bool),
+            'int': Setting('int', type=int),
+            'bool': Setting('bool', type=bool),
+            'falsy': Setting('falsy', type=bool),
         })
 
 
-class SettingDescriptorTest(SettingDescriptorBase):
+class SettingTest(SettingBase):
     def test_that_it_bounds_properly_to_instances(self):
         Holder = self.Holder()
 
@@ -53,7 +53,7 @@ class SettingsTest(unittest.TestCase):
         obj = self.Plain()
         obj.bacon = 'Fresh'
 
-        settings = Settings.from_object(obj)
+        settings = Settings().from_object(obj)
 
         self.assertTrue('bacon' in settings)
         self.assertEqual(settings.bacon, 'Fresh')
