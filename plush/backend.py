@@ -39,7 +39,7 @@ class Backend(Application):
     def __init__(self, handlers=None, default_host='', transforms=None,
                  wsgi=False, settings=None, plush=None, **rest):
 
-        Application.__init__(self, rest.pop('routes', None) or None,
+        Application.__init__(self, rest.pop('routes', None) or handlers,
                                    default_host, transforms, wsgi, **rest)
 
         self.plush = plush
