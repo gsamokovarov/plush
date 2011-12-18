@@ -13,7 +13,7 @@ __all__ = "Setting Settings SettingsView".split()
 
 try:
     import yaml
-except:
+except ImportError:
     YAML_ENABLED = False
 else:
     YAML_ENABLED = True
@@ -98,14 +98,16 @@ class Settings(dict):
 
         return tap(self, lambda self: self.update(obj.__dict__))
 
-    def from_module(self, modulename):
+    def from_module(self, modulename, package=None):
         '''
         Creates a :class:`Settings` object from a module.
 
-        The module must be importable from the current execution point.
+        The module must be importable from the current execution point. If you
+        specify an absolute import, you must give the `package` to be imported
+        from.
         '''
 
-        return self.from_object(import_module(modulename))
+        return self.from_object(import_module(modulename, package))
 
     def has(self, *options):
         'Checks whether the settings include all of the specified options.'
@@ -139,7 +141,6 @@ class SettingsView(dict):
         self.settings = settings
 
         class_attrs, dict_attrs = dir(type(self)), dir(dict)
-
         possibilities = set(class_attrs).difference(dict_attrs)
 
         for name in possibilities:

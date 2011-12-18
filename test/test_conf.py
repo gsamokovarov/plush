@@ -93,3 +93,9 @@ class TestSettingsView(unittest.TestCase):
 
         for key in ('static_handler_class', 'log_function'):
             self.assertFalse(key in conf)
+
+    def test_that_when_splatted_the_dict_contains_non_sentinel_valies(self):
+        conf = dict(**self.Configuration({}))
+
+        self.assertTrue('static_path' in conf)
+        self.assertFalse('log_function' in conf)

@@ -51,6 +51,8 @@ class Plush(object):
     def decorator(self, decorator):
         'Use a `decorator` for the requests.'
 
+        return tap(self, lambda self: self.decorators.append(decorator))
+
     def mixin(self, mixin):
         'Use a `mixin` for the reguests'
 
@@ -84,13 +86,16 @@ class Plush(object):
     def route(self, path, methods, **kw):
         'Routes a function accepting HTTP `path` and HTTP `methods`.'
 
-        def decorator(fn):
+        kw.setdefault('decorators', []).extend(self.decorators)
+        kw.setdefault('mixins', []).extend(self.mixins)
+
+        def wrapper(fn):
             request = self.request_class.from_function(fn, methods, **kw)
             self.routes.append((path, request))
 
             return fn
 
-        return decorator
+        return wrapper
 
     def get(self, path, **kw):
         return self.route(path, methods=['GET'], **kw)

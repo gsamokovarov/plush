@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import re
 import json
+from contextlib import contextmanager
 
 from tornado.web import RequestHandler
 from tornado.escape import json_encode as to_json
@@ -118,20 +119,40 @@ class Request(RequestHandler, redirect_from('request', 'application')):
 
         return Converters(self)
 
-    def param(self, name, default=RequestHandler._ARG_DEFAULT,
-                    strip=True, type=identity):
+    @contextmanager
+    def finishing(self):
         '''
-        Returns the value of the argument with the given name, converting it to
-        type if specified.
-
-        The contact for `type` is that it have to take one argument and raise
-        `ValueError` on bad input.
+        Finishes the request afther the end of the `with` block no mather if an
+        exception was raised.
         '''
 
         try:
-            return type(RequestHandler.get_argument(self, name, default, strip))
-        except ValueError, message:
+            yield self
+        finally:
+            self.finish()
+
+    def param(self, name, default=RequestHandler._ARG_DEFAULT,
+                    strip=True, type=identity, ensure=identity):
+        '''
+        Returns the value of the argument with the given `name`, converting it to
+        `type` if specified.
+
+        If `ensure` is specified it will be called after the type conversion.
+
+        The contact for `type` is that it have to take one argument and raise
+        `ValueError` on bad input.
+
+        The contact for `ensure` is that it have to take one argument and raise
+        `TypeError` on bad input.
+        '''
+
+        try:
+            value = type(RequestHandler.get_argument(self, name, default, strip))
+            value = ensure(value)
+        except (ValueError, TypeError), message:
             raise BadRequest(message)
+        else:
+            return value
 
     def error(self, error=None, status_code=500):
         '''
@@ -252,8 +273,8 @@ class Mimetype(RequestComposition):
         'Sets a `type` for the current request.'
 
         apply_defaults_from(self.DEFAULT_MIME_PARAMS, to=params)
-        self.request.set_headers('Content-Type',
-                                 encode_content_type(type, params))
+        self.request.set_header('Content-Type',
+                                encode_content_type(type, params))
 
     def param(self, name, default=None):
         'Gets a parameter by `name` or returns `default`.'
