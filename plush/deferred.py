@@ -28,4 +28,4 @@ class Deferred(object):
         'Cancel the current deffered object if the `condition` is true.'
 
         if condition:
-            self.cancel()
+            return self.cancel()

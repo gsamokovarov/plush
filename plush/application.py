@@ -122,8 +122,11 @@ class Plush(object):
 
         return self.deferred_class(milliseconds, callback, self.io_loop)
 
+    #: Application running
+    def prepare(self):
+        return self.backend_class(self.routes, settings=self.settings,
+                                  transforms=self.transforms, plush=self)
+
     def run(self, **options):
-        backend = self.backend_class(self.routes, settings=self.settings,
-                                     transforms=self.transforms, plush=self)
-        server = self.server_class(backend, self.io_loop)
+        server = self.server_class(self.prepare(), self.io_loop)
         server.serve(**options)
