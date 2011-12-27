@@ -97,12 +97,6 @@ class Request(RequestHandler, redirect_from('request', 'application')):
 
         return Mimetype(self)
 
-    @property
-    def content_type(self):
-        'Returns the request content type'
-
-        return self.mime.type
-
     @cachedproperty
     def cookie(self):
         'Returns the request cookie object.'
@@ -118,6 +112,24 @@ class Request(RequestHandler, redirect_from('request', 'application')):
         '''
 
         return Converters(self)
+
+    @apply
+    def content_type():
+        '''
+        Returns or settes the request content type using the underlying mime
+        type object.
+
+        Does not support parameters setting to keep the interface simple. If
+        you want to set parameters too, use :property:`mime`.
+        '''
+
+        def getter(self):
+            return self.mime.type
+
+        def setter(self, type):
+            self.mime.set(type)
+
+        return cachedproperty(fget=getter, fset=setter)
 
     @contextmanager
     def finishing(self):
@@ -188,6 +200,8 @@ class Request(RequestHandler, redirect_from('request', 'application')):
 
         Returns the created JSON.
         '''
+
+        self.mime.set('application/json')
 
         return tap(to_json(obj or json), lambda json: self.write(json))
 

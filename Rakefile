@@ -6,6 +6,7 @@ module Dependencies
       sh "#{dep} #{Array === input ? input.join(' ') : input}"
     end
   end
+
   self
 end
 
@@ -49,7 +50,7 @@ desc "Runs pylint"
 task(:lint) { pylint ["-E", "plush"] }
 
 desc "Runs the tests"
-task(:test) { nosetests }
+task(:test) { nosetests "test" }
 
 desc "Runs the benchmarks"
 task :bench do

@@ -23,18 +23,40 @@ class cachedproperty(property):
     if a proper use case is found.
     '''
 
-    def __get__(self, instance, owner):
-        if not hasattr(self, 'memoized'):
+    def memoize(self, instance, force=False):
+        if not hasattr(self, 'memoized') or force:
             self.memoized = self.fget(instance)
 
         return self.memoized
+
+    def __get__(self, instance, owner):
+        return self.memoize(instance)
+
+    def __set__(self, instance, value):
+        self.fset(instance, value)
+        self.memoize(instance)
 
 
 def tap(obj, interceptor):
     'Calls interceptor with `obj` and then return `obj`.'
 
     interceptor(obj)
+
     return obj
+
+
+def setdefaultattr(obj, attr, default=None):
+    '''
+    Sets a `default` `attr`ibute value on a `obj`ect.
+
+    Behaves like :meth:`dict.setdefault`, setting the attribute default value
+    only if the attribute does not exists on the `obj`ect.
+    '''
+
+    if hasattr(obj, attr):
+        return attr
+
+    return tap(default, lambda default: setattr(obj, attr, default))
 
 
 def try_in_order(*functions, **kw):
@@ -58,13 +80,13 @@ def try_in_order(*functions, **kw):
     raise
 
 
-#: Returns itself.
-identity = lambda obj: obj
-
-#: Unique singleton.
 class SentinelType(object):
     def __nonzero__(self):
         return False
     __bool__ = __nonzero__
 
+#: Unique singleton.
 Sentinel = SentinelType()
+
+#: Returns itself.
+identity = lambda obj: obj

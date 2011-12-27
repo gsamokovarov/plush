@@ -7,7 +7,9 @@ from .request import Request
 from .backend import Backend
 from .server import Server
 from .conf import Settings
-from .util.lang import tap
+from .util.lang import tap, setdefaultattr
+
+__all__ = "Plush".split()
 
 
 class Plush(object):
@@ -30,15 +32,11 @@ class Plush(object):
 
     def __init__(self, module_name, io_loop=None, **user_settings):
         self.module_name = module_name
-
         self.io_loop = io_loop or self.io_loop_class.instance()
-
         self.settings = Settings(user_settings)
-
         self.transforms = []
         self.decorators = []
         self.mixins = []
-
         self.routes = []
 
     #: Features and customizations.

@@ -34,9 +34,10 @@ class CachedPropertyTest(unittest.TestCase):
     def setUp(self):
         class Tester(object):
             def timer(self):
-                return time.time()
+                return getattr(self, 'forced', False) or time.time()
 
-            cached_timer = cachedproperty(timer) 
+            cached_timer = cachedproperty(timer,
+                fset=lambda self, value: setattr(self, 'forced', value)) 
             regular_timer = property(timer) 
 
         self.Tester = Tester
@@ -53,6 +54,13 @@ class CachedPropertyTest(unittest.TestCase):
         self.assertTrue(tester.cached_timer == tester.cached_timer)
         self.assertFalse(initial_regular == tester.regular_timer)
 
+    def test_that_it_remomeizes_after_setting(self):
+        tester = self.Tester()
+
+        tester.cached_timer = 42
+
+        self.assertTrue(tester.cached_timer == 42)
+
 
 class IdentityTest(unittest.TestCase):
     def test_that_it_returns_itself(self):
@@ -66,7 +74,7 @@ class TryInOrderTest(unittest.TestCase):
         self.assertTrue(try_in_order(lambda: 1 / 0, lambda: True) == True)
 
     def test_that_it_delegates_function_arguments(self):
-        self.assertTrue(try_in_order(lambda a : a / 0, lambda a: [a][0],
+        self.assertTrue(try_in_order(lambda a: a / 0, lambda a: [a][0],
                                      args=[1])  == 1)
 
     def test_that_it_preserves_the_last_stacktrace(self):
