@@ -30,8 +30,8 @@ class TestCase(AsyncHTTPTestCase):
 def test_case_for(app):
     'Creates a test case clas for the given `app`lication.`'
 
-    class AppTestCase(TestCase):
+    class AppSpecificTestCase(TestCase):
         def get_app(self):
             return app.prepare()
 
-    return AppTestCase
+    return AppSpecificTestCase

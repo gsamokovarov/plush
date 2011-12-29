@@ -67,11 +67,11 @@ class Request(RequestHandler, redirect_from('request', 'application')):
 
         parents = tuple([cls] + [mixin for mixin in mixins or []])
 
-        base = type(func.__name__, parents, {})
+        subclass = type(func.__name__, parents, {})
         for method in methods:
-            setattr(base, method.lower(), func)
+            setattr(subclass, method.lower(), func)
 
-        return base
+        return subclass
 
     @property
     def method(self):
@@ -92,7 +92,7 @@ class Request(RequestHandler, redirect_from('request', 'application')):
         return self.request_data
 
     @cachedproperty
-    def mime(self):
+    def mimetype(self):
         'Returns the request mime type object.'
 
         return Mimetype(self)
@@ -116,20 +116,32 @@ class Request(RequestHandler, redirect_from('request', 'application')):
     @apply
     def content_type():
         '''
-        Returns or settes the request content type using the underlying mime
-        type object.
+        Get or set the request content type using the underlying mime type
+        object.
 
         Does not support parameters setting to keep the interface simple. If
         you want to set parameters too, use :property:`mime`.
         '''
 
         def getter(self):
-            return self.mime.type
+            return self.mimetype.get()
 
         def setter(self, type):
-            self.mime.set(type)
+            self.mimetype.set(type)
 
-        return cachedproperty(fget=getter, fset=setter)
+        return cachedproperty(getter, setter)
+
+    @apply
+    def status_code():
+        'Get or set the request status code.'
+
+        def getter(self):
+            return self.get_status()
+
+        def setter(self, code):
+            self.set_status(code)
+
+        return property(getter, setter)
 
     @contextmanager
     def finishing(self):
@@ -141,7 +153,8 @@ class Request(RequestHandler, redirect_from('request', 'application')):
         try:
             yield self
         finally:
-            self.finish()
+            if not self._finished:
+                self.finish()
 
     def param(self, name, default=RequestHandler._ARG_DEFAULT,
                     strip=True, type=identity, ensure=identity):
@@ -201,7 +214,7 @@ class Request(RequestHandler, redirect_from('request', 'application')):
         Returns the created JSON.
         '''
 
-        self.mime.set('application/json')
+        self.content_type = 'application/json'
 
         return tap(to_json(obj or json), lambda json: self.write(json))
 
@@ -262,6 +275,9 @@ class Cookie(RequestComposition):
 
     def set(self, *args, **kwargs):
         self.request.set_cookie(*args, **kwargs)
+
+    def __getitem__(self, cookie):
+        return self.get(cookie)
 
 
 class Mimetype(RequestComposition):
