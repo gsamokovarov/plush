@@ -7,7 +7,7 @@ from .request import Request
 from .backend import Backend
 from .server import Server
 from .conf import Settings
-from .util.lang import tap, setdefaultattr
+from .util.lang import tap
 
 __all__ = "Plush".split()
 
@@ -61,9 +61,9 @@ class Plush(object):
         Use a `obj`ect for a `feature`.
 
         The currently supported features are:
-        * `transform` - use an `object` for a transform.
-        * `decorator` - use a `decorator` for every request function.
-        * `mixin` - use a mixin for every request handler.
+          * `transform` - use an `object` for a transform.
+          * `decorator` - use a `decorator` for every request function.
+          * `mixin` - use a mixin for every request handler.
 
         For every feature, there is a method named the same way. If that method
         suites your context or preferences better, you can use it instead.
@@ -120,7 +120,8 @@ class Plush(object):
 
         return self.deferred_class(milliseconds, callback, self.io_loop)
 
-    #: Application running
+    #: Application running.
+
     def prepare(self):
         return self.backend_class(self.routes, settings=self.settings,
                                   transforms=self.transforms, plush=self)

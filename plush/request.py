@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-import re
 import json
 from contextlib import contextmanager
 
@@ -8,37 +7,14 @@ from tornado.web import RequestHandler
 from tornado.escape import json_encode as to_json
 
 from .response import BadRequest
-from .util.lang import identity, cachedproperty, tap
+from .util.lang import identity, cachedproperty
 from .util.http import parse_content_type, encode_content_type
 from .util.iter import apply_defaults_from
 
 __all__ = "Request".split()
 
 
-def redirect_from(*targets):
-    'Redirects `target` attribute `dot` calls to underscore methods.'
-
-    target_pattern = '|'.join(targets)
-
-    class Redirection(object):
-        ATTR_REDIRECT_RE = \
-            re.compile(r'(?P<target>%s)_(?P<attr>\w+)' % target_pattern)
-
-        def __getattr__(self, attr):
-            match = self.ATTR_REDIRECT_RE.match(attr)
-
-            if match is not None:
-                target = getattr(self, match.group('target'))
-                redirected_attr = getattr(target, match.group('attr'))
-
-                return redirected_attr
-
-            return object.__getattr__(self, attr)
-
-    return Redirection
-
-
-class Request(RequestHandler, redirect_from('request', 'application')):
+class Request(RequestHandler):
     'Custom tornado `RequestHandler` providing nicer API.'
 
     @classmethod
@@ -77,33 +53,33 @@ class Request(RequestHandler, redirect_from('request', 'application')):
     def method(self):
         'Returns the request method.'
 
-        return self.request_method
+        return self.request.method
 
     @property
     def headers(self):
         'Returns the request headers.'
 
-        return self.request_headers
+        return self.request.headers
 
     @property
     def data(self):
         'Returns the raw request data.'
 
-        return self.request_data
+        return self.request.data
 
-    @cachedproperty
+    @property
     def mimetype(self):
         'Returns the request mime type object.'
 
         return Mimetype(self)
 
-    @cachedproperty
+    @property
     def cookie(self):
         'Returns the request cookie object.'
 
         return Cookie(self)
 
-    @cachedproperty
+    @property
     def like(self):
         '''
         Returns the possible request data converters.
@@ -129,7 +105,7 @@ class Request(RequestHandler, redirect_from('request', 'application')):
         def setter(self, type):
             self.mimetype.set(type)
 
-        return cachedproperty(getter, setter)
+        return property(getter, setter)
 
     @apply
     def status_code():
@@ -175,7 +151,7 @@ class Request(RequestHandler, redirect_from('request', 'application')):
             value = type(RequestHandler.get_argument(self, name, default, strip))
             value = ensure(value)
         except (ValueError, TypeError), message:
-            raise BadRequest(message)
+            self.error(BadRequest(message))
         else:
             return value
 
@@ -199,13 +175,16 @@ class Request(RequestHandler, redirect_from('request', 'application')):
         Returns the error message as a string.
         '''
 
-        self.set_status(getattr(error, 'status_code', status_code))
+        content = str(error or '')
 
-        return tap(str(error or ''), lambda obj: self.finish(obj))
+        self.status_code = getattr(error, 'status_code', status_code)
+        self.finish(content)
 
-    def json(self, obj=None, **json):
+        return content
+
+    def json(self, object=None, **json):
         '''
-        Sends a JSON out of an `obj`ect or keyword parameters.
+        Sends a JSON out of a json serializable `object` or keyword parameters.
 
         To create a JSON out of keywords you must not specify an object, you
         should just use keywords. The `obj`ect has higher presedense and the
@@ -214,30 +193,36 @@ class Request(RequestHandler, redirect_from('request', 'application')):
         Returns the created JSON.
         '''
 
+        content = object or json
+
         self.content_type = 'application/json'
+        self.write(to_json(content))
 
-        return tap(to_json(obj or json), lambda json: self.write(json))
+        return content
 
-    def send(self, obj):
+    def send(self, object):
         '''
-        Sends a object to the output buffer.
+        Sends an `object` to the output buffer.
 
         If the object is `list`, `tuple` or `dict` it will be send it as a JSON
         and we will set the content type to _application/json_.
 
         If the object is an exception it will finalize the request, set the
-        status code to 500 if the `obj`ect does not have `status_code`
-        attribute or the value that if the `status_code` is present.
+        status code to 500 if the `object` does not have a `status_code`
+        attribute or the value of it, if present.
 
         Otherwise will write a unicode representation of the object.
         '''
 
-        if isinstance(obj, (dict, list, tuple)):
-            return self.json(obj)
-        elif isinstance(obj, Exception):
-            return self.error(obj)
+        if isinstance(object, (dict, list, tuple)):
+            return self.json(object)
+        elif isinstance(object, Exception):
+            return self.error(object)
 
-        return tap(str(obj), lambda obj: self.write(obj))
+        content = str(object)
+        self.write(content)
+
+        return content
 
 
 class RequestComposition(object):
@@ -278,6 +263,8 @@ class Cookie(RequestComposition):
 
     def __getitem__(self, cookie):
         return self.get(cookie)
+
+    __call__ = get
 
 
 class Mimetype(RequestComposition):

@@ -19,8 +19,7 @@ class cachedproperty(property):
     '''
     Property that memoize it's target method return value.
 
-    Currently does not support attribute setting re-memoizing. Will support it
-    if a proper use case is found.
+    Supports re-memoization on setting.
     '''
 
     def memoize(self, instance, force=False):
@@ -34,29 +33,29 @@ class cachedproperty(property):
 
     def __set__(self, instance, value):
         self.fset(instance, value)
-        self.memoize(instance)
+        self.memoize(instance, force=True)
 
 
-def tap(obj, interceptor):
-    'Calls interceptor with `obj` and then return `obj`.'
+def tap(object, interceptor):
+    'Calls interceptor with `obj` and then return `object`.'
 
-    interceptor(obj)
+    interceptor(object)
 
-    return obj
+    return object
 
 
-def setdefaultattr(obj, attr, default=None):
+def setdefaultattr(object, attr, default=None):
     '''
-    Sets a `default` `attr`ibute value on a `obj`ect.
+    Sets a `default` `attr`ibute value on a `object`.
 
     Behaves like :meth:`dict.setdefault`, setting the attribute default value
     only if the attribute does not exists on the `obj`ect.
     '''
 
-    if hasattr(obj, attr):
+    if hasattr(object, attr):
         return attr
 
-    return tap(default, lambda default: setattr(obj, attr, default))
+    return tap(default, lambda default: setattr(object, attr, default))
 
 
 def try_in_order(*functions, **kw):

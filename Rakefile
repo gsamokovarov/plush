@@ -15,7 +15,7 @@ module Support
     pid = fork { exec(cmd) }
     Process.detach(pid)
 
-    sleep 1 and yield
+    sleep 5 and yield
 
     Process.kill("TERM", pid)
   end

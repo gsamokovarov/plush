@@ -26,12 +26,18 @@ class TestCase(AsyncHTTPTestCase):
                                self.stop)
         return self.wait()
 
+    get = AsyncHTTPTestCase.fetch
 
-def test_case_for(app):
-    'Creates a test case clas for the given `app`lication.`'
+
+#: Make `nose` or any other test name guessing library happy.
+def case_for(app):
+    'Creates a test case class for the given `app`lication.`'
 
     class AppSpecificTestCase(TestCase):
         def get_app(self):
             return app.prepare()
 
     return AppSpecificTestCase
+
+
+test_case_for = case_for
