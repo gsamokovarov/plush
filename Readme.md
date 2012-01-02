@@ -34,6 +34,10 @@ That's it. By default it will run a webserver on the _8088_ port.
 
 Watch the wiki for updates.
 
+# Install
+
+    pip install plush_web
+
 # License
 
 Copyright 2011 Genadi Samokovarov

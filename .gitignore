@@ -1,4 +1,5 @@
 .*.sw?
 *.py[co]
+*.egg-info
 env/
 docs/
