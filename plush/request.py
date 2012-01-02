@@ -193,10 +193,10 @@ class Request(RequestHandler):
         Returns the created JSON.
         '''
 
-        content = object or json
+        content = to_json(object or json)
 
         self.content_type = 'application/json'
-        self.write(to_json(content))
+        self.write(content)
 
         return content
 
@@ -220,6 +220,7 @@ class Request(RequestHandler):
             return self.error(object)
 
         content = str(object)
+
         self.write(content)
 
         return content
