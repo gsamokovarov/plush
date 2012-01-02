@@ -36,7 +36,7 @@ Watch the wiki for updates.
 
 # Install
 
-    pip install plush_web
+    pip install plush-web
 
 # License
 
