@@ -34,9 +34,9 @@ def response_for(status_code, name):
     return type(name, (base,), dict(status_code=status_code))
 
 
-for status_code, response_name in httplib.responses.iteritems():
-    response = response_for(status_code, response_name)
+@apply
+def popularize_namespace_with_responses():
+    for status_code, response_name in httplib.responses.iteritems():
+        response = response_for(status_code, response_name)
 
-    globals().setdefault(response.__name__, response)
-
-del status_code, response_name, response
+        globals().setdefault(response.__name__, response)

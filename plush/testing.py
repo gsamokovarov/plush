@@ -19,7 +19,9 @@ class PostRequest(HTTPRequest):
 
 
 class TestCase(AsyncHTTPTestCase):
-    'Basic asynchronous test case supporting easier post client requests.'
+    '''
+    Basic asynchronous test case supporting easier post client requests.
+    '''
 
     def post(self, path, body, **kwargs):
         self.http_client.fetch(PostRequest(self.get_url(path), body, **kwargs),
@@ -31,7 +33,9 @@ class TestCase(AsyncHTTPTestCase):
 
 #: Make `nose` or any other test name guessing library happy.
 def case_for(app):
-    'Creates a test case class for the given `app`lication.`'
+    '''
+    Creates a test case class for the given `app`lication.`
+    '''
 
     class AppSpecificTestCase(TestCase):
         def get_app(self):

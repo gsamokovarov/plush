@@ -8,7 +8,9 @@ __all__ = '''
 
 
 def apply_defaults_from(dictionary, to):
-    'Applies default values from a `dictionary` `to` another one.'
+    '''
+    Applies default values from a `dictionary` `to` another one.
+    '''
 
     for key, value in dictionary.iteritems():
         to.setdefault(key, value)
@@ -17,7 +19,9 @@ def apply_defaults_from(dictionary, to):
 
 
 def nth(iterable, n, default=None):
-    'Returns the `nth` element.'
+    '''
+    Returns the `nth` element.
+    '''
 
     return next(itertools.islice(iterable, n, None), default)
 

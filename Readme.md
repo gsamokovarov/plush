@@ -18,15 +18,17 @@ asynchronous.
 
 # Example
 
-    from plush import Plush
+~~~~~ python
+from plush import Plush
 
-    app = Plush(__name__)
+app = Plush(__name__)
 
-    @app.get(r'/')
-    def index(request):
-        request.send('Hello World!')
+@app.get(r'/')
+def index(request):
+    request.send('Hello World!')
 
-    app.run()
+app.run()
+~~~~~
 
 That's it. By default it will run a webserver on the _8088_ port.
 
@@ -34,7 +36,7 @@ That's it. By default it will run a webserver on the _8088_ port.
 
 Watch the wiki for updates.
 
-# Install
+# Installation
 
     pip install plush-web
 

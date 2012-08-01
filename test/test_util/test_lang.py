@@ -36,30 +36,22 @@ class CachedPropertyTest(unittest.TestCase):
             def timer(self):
                 return getattr(self, 'forced', False) or time.time()
 
-            cached_timer = cachedproperty(timer,
-                fset=lambda self, value: setattr(self, 'forced', value)) 
             regular_timer = property(timer) 
+            timer = cachedproperty(timer) 
 
         self.Tester = Tester
 
     def test_that_it_memoizes(self):
         tester = self.Tester()
 
-        initial_cached = tester.cached_timer
+        initial_cached = tester.timer
         initial_regular = tester.regular_timer
 
         time.sleep(0.1) # Force the time - kinda ugly, but meh...
 
-        self.assertTrue(initial_cached == tester.cached_timer)
-        self.assertTrue(tester.cached_timer == tester.cached_timer)
+        self.assertTrue(initial_cached == tester.timer)
+        self.assertTrue(tester.timer == tester.timer)
         self.assertFalse(initial_regular == tester.regular_timer)
-
-    def test_that_it_remomeizes_after_setting(self):
-        tester = self.Tester()
-
-        tester.cached_timer = 42
-
-        self.assertTrue(tester.cached_timer == 42)
 
 
 class IdentityTest(unittest.TestCase):

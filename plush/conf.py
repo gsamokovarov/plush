@@ -86,7 +86,9 @@ class Settings(dict):
                             args=(os.environ[envar],))
 
     def from_pyfile(self, filename):
-        'Creates a :class:`Settings` object from a python file.'
+        '''
+        Creates a :class:`Settings` object from a python file.
+        '''
 
         namespace = {}
         execfile(filename, namespace)
@@ -94,7 +96,9 @@ class Settings(dict):
         return tap(self, lambda self: self.update(namespace))
 
     def from_object(self, obj):
-        'Creates a :class:`Settings` object from a regular python object.'
+        '''
+        Creates a :class:`Settings` object from a regular python object.
+        '''
 
         return tap(self, lambda self: self.update(obj.__dict__))
 
@@ -110,12 +114,16 @@ class Settings(dict):
         return self.from_object(import_module(modulename, package))
 
     def has(self, *options):
-        'Checks whether the settings include all of the specified options.'
+        '''
+        Checks whether the settings include all of the specified options.
+        '''
 
         return all(opt in self for opt in options)
 
     def has_some_of(self, *options):
-        'Checks whether the settings include any of the specified options.'
+        '''
+        Checks whether the settings include any of the specified options.
+        '''
 
         return any(opt in self for opt in options)
 

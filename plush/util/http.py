@@ -7,7 +7,6 @@ def parse_content_type(raw_content_type):
     '''
 
     type, _, params = (raw_content_type or '').partition(';')
-
     type = type.strip()
 
     params = filter(bool, params.split(';'))

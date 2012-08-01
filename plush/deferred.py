@@ -20,12 +20,16 @@ class Deferred(object):
                                                 stack_context.wrap(callback))
 
     def cancel(self):
-        'Cancels the current deferred object.'
+        '''
+        Cancels the current deferred object.
+        '''
 
         return self.io_loop.remove_timeout(self.timeout)
 
     def cancel_if(self, condition):
-        'Cancel the current deffered object if the `condition` is true.'
+        '''
+        Cancel the current deffered object if the `condition` is true.
+        '''
 
         if condition:
             return self.cancel()

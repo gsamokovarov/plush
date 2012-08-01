@@ -15,29 +15,42 @@ class classonlymethod(classmethod):
         return classmethod.__get__(self, instance, owner)
 
 
-class cachedproperty(property):
+class cachedproperty(object):
     '''
     Property that memoize it's target method return value.
-
-    Supports re-memoization on setting.
     '''
 
-    def memoize(self, instance, force=False):
-        if not hasattr(self, 'memoized') or force:
-            self.memoized = self.fget(instance)
+    # The implementation is ripped off django.
 
-        return self.memoized
+    def __init__(self, getter):
+        self.getter = getter
 
     def __get__(self, instance, owner):
-        return self.memoize(instance)
+        result = instance.__dict__[self.getter.__name__] = self.getter(instance)
 
-    def __set__(self, instance, value):
-        self.fset(instance, value)
-        self.memoize(instance, force=True)
+        return result
+
+
+def curry(function, *curried_args, **curried_kw):
+    '''
+    Curries a function or a method with a positional or keyworded arguments.
+
+    To be used in places where `functools.partial` can not. For example to
+    curry methods while still in the class definition. This will not work with
+    `functools.partial` as it returns a `Partial` object, instead of raw
+    function.
+    '''
+
+    def curried_function(*args, **kw):
+        return function(*(curried_args + args), **dict(curried_kw, **kw))
+    
+    return curried_function
 
 
 def tap(object, interceptor):
-    'Calls interceptor with `obj` and then return `object`.'
+    '''
+    Calls interceptor with `obj` and then return `object`.
+    '''
 
     interceptor(object)
 

@@ -1,7 +1,7 @@
-%w{ rubygems rake }.each { |pack| require pack }
+%w{ rubygems rake }.each { |p| require p }
 
 module Dependencies
-  %w{python pip virtualenv nosetests pylint git}.each do |dep|
+  %w{ python pip virtualenv nosetests pylint git }.each do |dep|
     define_method(dep) do |input = nil|
       sh "#{dep} #{Array === input ? input.join(' ') : input}"
     end
@@ -31,7 +31,7 @@ module Support
   end
 end
 
-[FileUtils, Dependencies, Support].each { |mod| include mod }
+[FileUtils, Dependencies, Support].each { |m| include m }
 
 desc "Cleans all"
 task :clean => (namespace :clean do

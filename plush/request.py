@@ -15,13 +15,15 @@ __all__ = "Request".split()
 
 
 class Request(RequestHandler):
-    'Custom tornado `RequestHandler` providing nicer API.'
+    '''
+    Custom tornado `RequestHandler` providing nicer API.
+    '''
 
     @classmethod
     def from_function(cls, func, methods, decorators=None, mixins=None):
         '''
-        Creates a new `Request` from a function, to serve as a specific HTTP
-        verbs dispatcher.
+        Creates a new `Request` from a function to serve as a specific HTTP
+        verb dispatcher.
 
         The function must accept at least one positional argument, as it would
         be bound directly to the created class. You can think of it as `self`
@@ -36,7 +38,7 @@ class Request(RequestHandler):
 
         if any(method not in cls.SUPPORTED_METHODS for method in methods):
             raise ValueError('methods %r must be one of %r' %
-                             (methods, cls.SUPPORTED_METHODS))
+                             (list(methods.keys()), cls.SUPPORTED_METHODS))
 
         for decorator in decorators or []:
             func = decorator(func)
@@ -51,35 +53,45 @@ class Request(RequestHandler):
 
     @property
     def method(self):
-        'Returns the request method.'
+        '''
+        Returns the request method.
+        '''
 
         return self.request.method
 
     @property
     def headers(self):
-        'Returns the request headers.'
+        '''
+        Returns the request headers.
+        '''
 
         return self.request.headers
 
     @property
     def data(self):
-        'Returns the raw request data.'
+        '''
+        Returns the raw request data.
+        '''
 
         return self.request.data
 
-    @property
+    @cachedproperty
     def mimetype(self):
-        'Returns the request mime type object.'
+        '''
+        Returns the request mime type object.
+        '''
 
         return Mimetype(self)
 
-    @property
+    @cachedproperty
     def cookie(self):
-        'Returns the request cookie object.'
+        '''
+        Returns the request cookie object.
+        '''
 
         return Cookie(self)
 
-    @property
+    @cachedproperty
     def like(self):
         '''
         Returns the possible request data converters.
@@ -109,7 +121,9 @@ class Request(RequestHandler):
 
     @apply
     def status_code():
-        'Get or set the request status code.'
+        '''
+        Get or set the request status code.
+        '''
 
         def getter(self):
             return self.get_status()
@@ -283,18 +297,24 @@ class Mimetype(RequestComposition):
         self.type, self.params = parse_content_type(raw_content_type)
 
     def get(self, default=None):
-        'Returns the content type or `default` if not specified.'
+        '''
+        Returns the content type or `default` if not specified.
+        '''
 
         return self.type or default
 
     def set(self, type, **params):
-        'Sets a `type` for the current request.'
+        '''
+        Sets a `type` for the current request.
+        '''
 
         apply_defaults_from(self.DEFAULT_MIME_PARAMS, to=params)
         self.request.set_header('Content-Type',
                                 encode_content_type(type, params))
 
     def param(self, name, default=None):
-        'Gets a parameter by `name` or returns `default`.'
+        '''
+        Gets a parameter by `name` or returns `default`.
+        '''
 
         return self.params.get(name, default)

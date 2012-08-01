@@ -3,7 +3,9 @@ from tornado.ioloop import IOLoop
 
 
 class Server(object):
-    'Wrapper around the tornado server.'
+    '''
+    Wrapper around the tornado server.
+    '''
 
     DEFAULT_HTTP_PORT = 8088
 

@@ -1,12 +1,14 @@
 from __future__ import absolute_import
 
-from tornado.web import Application
+from tornado.web import Application, URLSpec
 
 from .conf import Setting, SettingsView
 
 
 class Configuration(SettingsView):
-    'Upper cased settings view for the standard `tornado` settings.'
+    '''
+    Upper cased settings view for the standard `tornado` settings.
+    '''
 
     debug = Setting('DEBUG')
 
@@ -34,7 +36,9 @@ class Configuration(SettingsView):
 
 
 class Backend(Application):
-    'Extended tornado application to support our custom routings.'
+    '''
+    Extended tornado application to support our custom routings.
+    '''
 
     def __init__(self, handlers=None, default_host='', transforms=None,
                  wsgi=False, settings=None, plush=None, **rest):
@@ -46,5 +50,3 @@ class Backend(Application):
 
         Application.__init__(self, rest.pop('routes', None) or handlers,
                                    default_host, transforms, wsgi, **settings)
-
-
