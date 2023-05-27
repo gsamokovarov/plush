@@ -4,5 +4,5 @@ logilab-common==0.57.1
 nose==1.1.2
 pyflakes==0.5.0
 pylint==0.25.0
-tornado==2.1.1
+tornado==6.3.2
 wsgiref==0.1.2
